@@ -1,0 +1,130 @@
+<div class="container mt-5">
+    <h1 class="text-center">Doctor List</h1>
+
+    <!-- Form to Add New Doctor -->
+    <form id="addDoctorForm" class="my-4">
+        <div class="input-group">
+            <input type="text" id="newName" class="form-control" placeholder="Enter doctor name..." required>
+            <input type="text" id="newSpecialization" class="form-control" placeholder="Enter specialization..." required>
+            <input type="text" id="newPhone" class="form-control" placeholder="Enter phone..." required>
+            <div class="input-group-append">
+                <button type="submit" class="btn btn-primary">Add Doctor</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- List of Doctors -->
+    <ul id="doctorList" class="list-group">
+        <% doctors.forEach(doctor => { %>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>
+                    <%= doctor.name %> - <%= doctor.specialization %> - <%= doctor.phone %>
+                </span>
+                <div>
+                    <button class="btn btn-sm btn-success mr-2 editBtn" data-id="<%= doctor.id %>">Edit</button>
+                    <button class="btn btn-sm btn-danger deleteBtn" data-id="<%= doctor.id %>">Delete</button>
+                </div>
+            </li>
+        <% }); %>
+    </ul>
+
+    <!-- Edit Doctor Modal -->
+    <div id="editModal" class="modal fade" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">Edit Doctor</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editDoctorForm">
+                        <div class="form-group">
+                            <label for="editName">Name</label>
+                            <input type="text" id="editName" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editSpecialization">Specialization</label>
+                            <input type="text" id="editSpecialization" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editPhone">Phone</label>
+                            <input type="text" id="editPhone" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Add new doctor
+        $('#addDoctorForm').on('submit', function (e) {
+            e.preventDefault();
+            const name = $('#newName').val().trim();
+            const specialization = $('#newSpecialization').val().trim();
+            const phone = $('#newPhone').val().trim();
+            if (name && specialization && phone) {
+                $.ajax({
+                    url: '/doctors',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ name, specialization, phone }),
+                    success: function (newDoctor) {
+                        location.reload(); // Reload to show the new doctor
+                    },
+                    error: function (error) {
+                        console.error("Error adding doctor:", error.responseText);
+                    }
+                });
+            }
+        });
+
+        // Delete a doctor
+        $('.deleteBtn').on('click', function () {
+            const id = $(this).data('id');
+            $.ajax({
+                url: '/doctors/' + id,
+                type: 'DELETE',
+                success: function () {
+                    location.reload(); // Reload to show updated list
+                }
+            });
+        });
+
+        // Show edit modal with the current doctor info
+        let editId;
+        $('.editBtn').on('click', function () {
+            editId = $(this).data('id');
+            const currentName = $(this).closest('li').find('span').text().split(' - ')[0];
+            const currentSpecialization = $(this).closest('li').find('span').text().split(' - ')[1];
+            const currentPhone = $(this).closest('li').find('span').text().split(' - ')[2];
+            $('#editName').val(currentName);
+            $('#editSpecialization').val(currentSpecialization);
+            $('#editPhone').val(currentPhone);
+            $('#editModal').modal('show');
+        });
+
+        // Update doctor on form submission
+        $('#editDoctorForm').on('submit', function (e) {
+            e.preventDefault();
+            const name = $('#editName').val().trim();
+            const specialization = $('#editSpecialization').val().trim();
+            const phone = $('#editPhone').val().trim();
+            if (name && specialization && phone) {
+                $.ajax({
+                    url: '/doctors/' + editId,
+                    type: 'PUT',
+                    data: JSON.stringify({ name, specialization, phone }),
+                    contentType: 'application/json',
+                    success: function () {
+                        location.reload(); // Reload to show the updated doctor
+                    }
+                });
+            }
+        });
+    });
+</script>

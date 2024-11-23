@@ -1,0 +1,130 @@
+<div class="container mt-5">
+    <h1 class="text-center">Patient List</h1>
+
+    <!-- Form to Add New Patient -->
+    <form id="addPatientForm" class="my-4">
+        <div class="input-group">
+            <input type="text" id="newName" class="form-control" placeholder="Enter patient name..." required>
+            <input type="number" id="newAge" class="form-control" placeholder="Enter age..." required>
+            <input type="text" id="newDiagnosis" class="form-control" placeholder="Enter diagnosis..." required>
+            <div class="input-group-append">
+                <button type="submit" class="btn btn-primary">Add Patient</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- List of Patients -->
+    <ul id="patientList" class="list-group">
+        <% patients.forEach(patient => { %>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>
+                    <%= patient.name %> - <%= patient.age %> - <%= patient.diagnosis %>
+                </span>
+                <div>
+                    <button class="btn btn-sm btn-success mr-2 editBtn" data-id="<%= patient.id %>">Edit</button>
+                    <button class="btn btn-sm btn-danger deleteBtn" data-id="<%= patient.id %>">Delete</button>
+                </div>
+            </li>
+        <% }); %>
+    </ul>
+
+    <!-- Edit Patient Modal -->
+    <div id="editModal" class="modal fade" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">Edit Patient</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editPatientForm">
+                        <div class="form-group">
+                            <label for="editName">Name</label>
+                            <input type="text" id="editName" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editAge">Age</label>
+                            <input type="number" id="editAge" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editDiagnosis">Diagnosis</label>
+                            <input type="text" id="editDiagnosis" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Add new patient
+        $('#addPatientForm').on('submit', function (e) {
+            e.preventDefault();
+            const name = $('#newName').val().trim();
+            const age = $('#newAge').val();
+            const diagnosis = $('#newDiagnosis').val().trim();
+            if (name && age && diagnosis) {
+                $.ajax({
+                    url: '/patients',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ name, age, diagnosis }),
+                    success: function (newPatient) {
+                        location.reload(); // Reload to show the new patient
+                    },
+                    error: function (error) {
+                        console.error("Error adding patient:", error.responseText);
+                    }
+                });
+            }
+        });
+
+        // Delete a patient
+        $('.deleteBtn').on('click', function () {
+            const id = $(this).data('id');
+            $.ajax({
+                url: '/patients/' + id,
+                type: 'DELETE',
+                success: function () {
+                    location.reload(); // Reload to show updated list
+                }
+            });
+        });
+
+        // Show edit modal with the current patient info
+        let editId;
+        $('.editBtn').on('click', function () {
+            editId = $(this).data('id');
+            const currentName = $(this).closest('li').find('span').text().split(' - ')[0];
+            const currentAge = $(this).closest('li').find('span').text().split(' - ')[1];
+            const currentDiagnosis = $(this).closest('li').find('span').text().split(' - ')[2];
+            $('#editName').val(currentName);
+            $('#editAge').val(currentAge);
+            $('#editDiagnosis').val(currentDiagnosis);
+            $('#editModal').modal('show');
+        });
+
+        // Update patient on form submission
+        $('#editPatientForm').on('submit', function (e) {
+            e.preventDefault();
+            const name = $('#editName').val().trim();
+            const age = $('#editAge').val();
+            const diagnosis = $('#editDiagnosis').val().trim();
+            if (name && age && diagnosis) {
+                $.ajax({
+                    url: '/patients/' + editId,
+                    type: 'PUT',
+                    data: JSON.stringify({ name, age, diagnosis }),
+                    contentType: 'application/json',
+                    success: function () {
+                        location.reload(); // Reload to show the updated patient
+                    }
+                });
+            }
+        });
+    });
+</script>
