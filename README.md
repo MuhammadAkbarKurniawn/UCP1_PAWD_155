@@ -13,3 +13,10 @@
 ![Screenshot 2024-11-23 162651](https://github.com/user-attachments/assets/c6ed24e4-f289-48d7-9553-fcf74c5fe0f7)
 
 ![Screenshot 2024-11-23 162651](https://github.com/user-attachments/assets/ccf71d3b-0a10-431d-bbd4-bbb5940a6de9)
+
+Tampilan
+![image](https://github.com/user-attachments/assets/d60fd7ed-6544-4a5f-b79c-33d8d2b67ccb)
+
+![image](https://github.com/user-attachments/assets/e3da5236-f297-4749-a776-bfee398f44a8)
+
+![image](https://github.com/user-attachments/assets/02078fd5-9597-46df-80de-ac2647f074dd)
